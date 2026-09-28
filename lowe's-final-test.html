@@ -1,0 +1,1957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lowe's Final Test — Customized</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #EDEAE3;
+  --surface:   #F7F5F0;
+  --panel:     #FFFFFF;
+  --border:    #C8C5BC;
+  --border-md: #A8A49B;
+  --text:      #1C1B18;
+  --text-muted:#706E68;
+  --text-dim:  #9B9891;
+  --green:     #2A7A4B;
+  --green-bg:  #DFF2E8;
+  --red:       #B03030;
+  --red-bg:    #FDEAEA;
+  --amber:     #8A5A00;
+  --amber-bg:  #FFF0CC;
+  --blue:      #1A5FA8;
+  --blue-bg:   #E8F0FB;
+  --mono:      'Courier New', Courier, monospace;
+  --ui:        system-ui, -apple-system, sans-serif;
+}
+
+[data-theme="dark"] {
+  --bg:        #1A1A1E;
+  --surface:   #232328;
+  --panel:     #2A2A30;
+  --border:    #3E3E46;
+  --border-md: #52525C;
+  --text:      #E8E6E1;
+  --text-muted:#9D9B95;
+  --text-dim:  #6E6C66;
+  --green:     #3FBF6F;
+  --green-bg:  #1A3328;
+  --red:       #E05555;
+  --red-bg:    #3A1A1A;
+  --amber:     #D4980A;
+  --amber-bg:  #3A2E10;
+  --blue:      #5A9FE8;
+  --blue-bg:   #1A2A3E;
+}
+
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: var(--ui);
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── HEADER ── */
+.header {
+  background: var(--panel);
+  border-bottom: 1.5px solid var(--border);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 52px;
+  flex-shrink: 0;
+}
+.header-title { font-size: 15px; font-weight: 700; letter-spacing: 0.03em; color: var(--text); white-space: nowrap; }
+.header-sep { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-md); flex-shrink: 0; }
+.status-dot.open { background: var(--green); box-shadow: 0 0 0 2px var(--green-bg); }
+
+/* ── TOOLBAR ── */
+.toolbar {
+  background: var(--panel);
+  border-bottom: 1.5px solid var(--border);
+  padding: 7px 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px 5px;
+  min-height: 48px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.tb-btn {
+  height: 32px; padding: 0 13px; border-radius: 6px;
+  border: 1.5px solid var(--border-md); background: var(--surface);
+  color: var(--text); font-family: var(--ui); font-size: 13px; font-weight: 500;
+  cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 6px;
+  transition: background 0.1s, border-color 0.1s;
+}
+.tb-btn:hover { background: #E5E2DA; border-color: var(--text-muted); }
+.tb-btn:active { transform: scale(0.98); }
+.tb-btn.connect { border-color: var(--green); color: var(--green); background: var(--green-bg); font-weight: 600; }
+.tb-btn.connect:hover { background: #C6EDD8; }
+.tb-btn.disconnect { border-color: var(--red); color: var(--red); background: var(--red-bg); font-weight: 600; }
+.tb-btn.disconnect:hover { background: #F9CECE; }
+.tb-btn.ts-on { border-color: var(--green); color: var(--green); }
+.tb-btn.ts-off { border-color: var(--red); color: var(--red); }
+.tb-select {
+  height: 32px; padding: 0 8px; border-radius: 6px;
+  border: 1.5px solid var(--border-md); background: var(--surface);
+  color: var(--text); font-family: var(--ui); font-size: 13px; cursor: pointer; outline: none;
+}
+.tb-label { font-size: 12px; color: var(--text-muted); font-weight: 500; white-space: nowrap; }
+.tb-group { display: flex; align-items: center; gap: 5px; }
+.tb-sep { width: 1px; height: 22px; background: var(--border); margin: 0 3px; flex-shrink: 0; }
+
+/* ── BODY ── */
+.body-layout { flex: 1; min-height: 0; display: flex; overflow: hidden; }
+
+/* ── LEFT: Workflow ── */
+.left-panel {
+  width: 420px; flex-shrink: 0; background: var(--panel);
+  border-right: 1.5px solid var(--border);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.panel-header {
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+.panel-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-muted);
+}
+.wf-scroll {
+  flex: 1; overflow-y: auto; padding: 12px 14px 20px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.wf-scroll::-webkit-scrollbar { width: 5px; }
+.wf-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* Workflow steps */
+.wf-step {
+  padding: 12px 14px; background: var(--surface); border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.wf-step-title {
+  font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 8px;
+}
+.wf-step-desc {
+  font-size: 12px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.5;
+}
+.wf-btn {
+  height: 34px; padding: 0 18px; border-radius: 6px;
+  border: 1.5px solid var(--blue); background: var(--blue-bg);
+  color: var(--blue); font-family: var(--ui); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: background 0.1s;
+}
+.wf-btn:hover { background: #C8DEFF; }
+.wf-btn:active { transform: scale(0.98); }
+.wf-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.wf-btn.success { border-color: var(--green); background: var(--green-bg); color: var(--green); }
+.wf-btn.danger { border-color: var(--red); background: var(--red-bg); color: var(--red); }
+
+.wf-status {
+  font-size: 12px; font-weight: 600; padding: 4px 0; line-height: 1.5;
+}
+.wf-status.ok { color: var(--green); }
+.wf-status.err { color: var(--red); }
+.wf-status.warn { color: var(--amber); }
+.wf-status.info { color: var(--text-muted); }
+
+/* ── RIGHT: Results ── */
+.right-panel {
+  flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg);
+}
+.log-header {
+  display: flex; align-items: center; padding: 12px 20px;
+  background: var(--panel); border-bottom: 1.5px solid var(--border); gap: 10px;
+}
+.log-title { font-size: 13px; font-weight: 700; color: var(--text); }
+.log-actions { margin-left: auto; display: flex; gap: 6px; }
+.log-btn {
+  height: 28px; padding: 0 12px; border-radius: 5px;
+  border: 1.5px solid var(--border-md); background: var(--surface);
+  color: var(--text-muted); font-family: var(--ui); font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: background 0.1s;
+}
+.log-btn:hover { background: #E5E2DA; color: var(--text); }
+
+.results-wrap {
+  flex: 1; overflow-y: scroll; padding: 16px 20px;
+  display: flex; flex-direction: column; gap: 12px; min-height: 0;
+}
+.results-wrap::-webkit-scrollbar { width: 8px; }
+.results-wrap::-webkit-scrollbar-track { background: var(--surface); border-radius: 4px; }
+.results-wrap::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 4px; }
+
+/* Results table */
+.result-card {
+  background: var(--panel); border-radius: 8px; border: 1px solid var(--border);
+  overflow: hidden;
+}
+.result-card-title {
+  font-size: 12px; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--text-muted);
+  padding: 10px 14px; border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.result-table {
+  width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 12px;
+}
+.result-table th {
+  text-align: left; padding: 8px 12px; font-size: 10px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim);
+  background: var(--surface); border-bottom: 1px solid var(--border);
+}
+.result-table td {
+  padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text);
+}
+.result-table tr:last-child td { border-bottom: none; }
+.result-table .pass { color: var(--green); font-weight: 700; }
+.result-table .fail { color: var(--red); font-weight: 700; }
+.result-table .changed { color: var(--amber); font-weight: 700; }
+
+.tables-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+.wf-btn-row { display: flex; gap: 8px; }
+.wf-step.hidden { display: none; }
+
+/* ── DIP Switch Visual ── */
+.dip-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 8px;
+}
+.dip-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+  padding: 8px 10px; text-align: center;
+}
+.dip-card-label {
+  font-size: 11px; font-weight: 700; color: var(--text); margin-bottom: 6px;
+}
+.dip-body {
+  display: inline-flex; gap: 3px; background: #D63031; border-radius: 4px;
+  padding: 4px 5px 18px; position: relative;
+}
+.dip-body::before {
+  content: 'ON'; position: absolute; top: -1px; left: 4px;
+  font-size: 6px; font-weight: 800; color: #fff; letter-spacing: 0.05em;
+}
+.dip-sw {
+  width: 12px; height: 24px; background: #F5F0E8; border-radius: 2px;
+  display: flex; flex-direction: column; position: relative;
+}
+.dip-sw .dip-knob {
+  width: 10px; height: 10px; background: #FFF; border-radius: 1.5px;
+  border: 1px solid #CCC; position: absolute; left: 1px;
+  transition: top 0.15s;
+}
+.dip-sw.off .dip-knob { top: 12px; }
+.dip-sw.on .dip-knob { top: 1px; background: var(--green); border-color: var(--green); }
+.dip-sw-num {
+  font-size: 7px; font-weight: 700; color: #fff; margin-top: 2px;
+  text-align: center; position: absolute; bottom: -12px; left: 0; width: 100%;
+}
+[data-theme="dark"] .dip-sw { background: #3A3530; }
+[data-theme="dark"] .dip-sw .dip-knob { background: #E8E6E1; border-color: #9A9590; }
+
+/* ── Self Detect Buttons ── */
+.sd-btn {
+  width: 100%; height: 36px; border-radius: 6px;
+  border: 1.5px solid var(--border-md); background: var(--surface);
+  color: var(--text); font-family: var(--ui); font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+}
+.sd-btn:hover:not(:disabled) { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
+.sd-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.sd-btn.active { border-color: var(--blue); background: var(--blue-bg); color: var(--blue); animation: pulse-border 1.5s infinite; }
+.sd-btn.done { border-color: var(--green); background: var(--green-bg); color: var(--green); }
+.sd-btn.fail { border-color: var(--red); background: var(--red-bg); color: var(--red); }
+@keyframes pulse-border { 0%,100% { box-shadow: 0 0 0 0 rgba(26,95,168,0.3); } 50% { box-shadow: 0 0 0 4px rgba(26,95,168,0.15); } }
+.sd-result {
+  font-family: var(--mono); font-size: 10px; color: var(--text-dim);
+  margin-top: 3px; text-align: center; min-height: 14px;
+}
+
+/* Result log rows */
+.res-row {
+  font-family: var(--mono); font-size: 12px; line-height: 1.8;
+  padding: 4px 8px; border-radius: 4px;
+}
+.res-row.rx { color: #7B3FA8; background: #F5E8FF; border: 1px solid #D8C0F0; }
+.res-row.cmd { color: var(--blue); background: var(--blue-bg); border: 1px solid #99C0F0; }
+.res-row.info { color: var(--text-muted); }
+.res-row.ok { color: var(--green); background: var(--green-bg); border: 1px solid var(--green); }
+.res-row.err { color: var(--red); background: var(--red-bg); border: 1px solid var(--red); }
+
+[data-theme="dark"] .res-row.rx { background: #2A1A3A; border-color: #5A3A7A; }
+[data-theme="dark"] .res-row.cmd { background: var(--blue-bg); border-color: #3A5A8A; }
+[data-theme="dark"] .res-row.ok { background: var(--green-bg); border-color: #2A5A3A; }
+[data-theme="dark"] .res-row.err { background: var(--red-bg); border-color: #5A2A2A; }
+
+/* API warn */
+.api-warn {
+  margin: 12px 20px 0; background: var(--amber-bg); border: 1.5px solid #D4980A;
+  border-radius: 7px; padding: 9px 14px; font-size: 12.5px; color: var(--amber); font-weight: 500;
+}
+
+/* Theme button */
+.theme-btn {
+  height: 32px; width: 32px; border-radius: 6px;
+  border: 1.5px solid var(--border-md); background: var(--surface);
+  color: var(--text); cursor: pointer; display: flex; align-items: center;
+  justify-content: center; transition: background 0.15s; flex-shrink: 0;
+}
+.theme-btn:hover { background: var(--blue-bg); border-color: var(--blue); }
+
+/* Numeration toggle switch */
+.num-toggle-group {
+  display: flex; align-items: center; gap: 7px;
+  padding: 3px 10px; border-radius: 20px; border: 1.5px solid var(--border);
+  background: var(--surface);
+}
+.num-toggle-label {
+  font-size: 12px; font-weight: 600; color: var(--text-muted); white-space: nowrap;
+}
+.num-switch {
+  position: relative; display: inline-block; width: 34px; height: 19px; flex-shrink: 0;
+}
+.num-switch input { opacity: 0; width: 0; height: 0; }
+.num-switch-slider {
+  position: absolute; cursor: pointer; inset: 0;
+  background: var(--border-md); border-radius: 20px; transition: background 0.15s;
+}
+.num-switch-slider::before {
+  content: ''; position: absolute; height: 13px; width: 13px; left: 3px; bottom: 3px;
+  background: #fff; border-radius: 50%; transition: transform 0.15s;
+}
+.num-switch input:checked + .num-switch-slider { background: var(--green); }
+.num-switch input:checked + .num-switch-slider::before { transform: translateX(15px); }
+.num-switch input:disabled + .num-switch-slider { opacity: 0.5; cursor: not-allowed; }
+
+/* Dark mode overrides */
+[data-theme="dark"] .tb-btn:hover { background: #35353D; }
+[data-theme="dark"] .tb-btn.connect:hover { background: #1F3D2D; }
+[data-theme="dark"] .tb-btn.disconnect:hover { background: #451F1F; }
+[data-theme="dark"] .log-btn:hover { background: #35353D; }
+[data-theme="dark"] .wf-btn:hover { background: #253A52; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="status-dot" id="statusDot"></div>
+  <div class="header-title">Lowe's Final Test <span style="color:var(--blue); font-weight:600;">— Customized</span></div>
+  <div class="header-sep"></div>
+  <span style="font-size:12px; color:var(--text-muted);">Locker final testing</span>
+  <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
+    <div class="num-toggle-group">
+      <span class="num-toggle-label">With Numeration?</span>
+      <label class="num-switch">
+        <input type="checkbox" id="numerationToggle" onchange="updateStepTitles()">
+        <span class="num-switch-slider"></span>
+      </label>
+    </div>
+    <div class="num-toggle-group">
+      <span class="num-toggle-label">With Compartment/Port Map?</span>
+      <label class="num-switch">
+        <input type="checkbox" id="compartmentMapToggle" onchange="updateStepTitles()">
+        <span class="num-switch-slider"></span>
+      </label>
+    </div>
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle Dark/Light mode">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/>
+        <line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/>
+        <line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+    </button>
+    <span class="tb-label" id="apiBadge" style="padding:3px 10px; border-radius:20px; border:1.5px solid var(--border);">checking…</span>
+  </div>
+</div>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="tb-group">
+    <button class="tb-btn connect" id="connectBtn" onclick="openPort()">⬡ Connect COM Port</button>
+    <button class="tb-btn disconnect" id="disconnectBtn" onclick="closePort()" style="display:none;">✕ Disconnect</button>
+  </div>
+  <div class="tb-sep"></div>
+  <div class="tb-group">
+    <span class="tb-label">Send Line End</span>
+    <select class="tb-select" id="eolSelect">
+      <option value="CR" selected>CR (\r)</option>
+      <option value="LF">LF (\n)</option>
+      <option value="CRLF">CR+LF</option>
+    </select>
+  </div>
+  <div class="tb-sep"></div>
+  <div class="tb-group">
+    <span class="tb-label">Baud Rate</span>
+    <select class="tb-select" id="baudSelect">
+      <option value="9600">9600</option>
+      <option value="115200" selected>115200</option>
+    </select>
+  </div>
+  <div class="tb-sep"></div>
+  <button class="tb-btn ts-on" id="tsBtn" onclick="sendTimestampOff()">⏱ Timestamp: ON</button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" id="btnDownloadAllTop" onclick="downloadAllTop()">↓ Download Log &amp; Report</button>
+</div>
+
+<!-- BODY -->
+<div class="body-layout">
+
+  <!-- LEFT: Workflow -->
+  <div class="left-panel">
+    <div class="panel-header">
+      <div class="panel-title">Workflow</div>
+    </div>
+    <div class="wf-scroll" id="wfScroll">
+
+      <!-- Tester Name & Sales Order -->
+      <div class="wf-step" id="step-tester">
+        <div class="wf-step-title">Tested By</div>
+        <input type="text" id="testerNameInput" class="cmd-input-full" placeholder="Your name" style="width:100%; height:34px; padding:0 10px; border-radius:6px; border:1.5px solid var(--border-md); background:var(--surface); color:var(--text); font-family:var(--ui); font-size:13px;" oninput="saveTesterName()">
+      </div>
+
+      <div class="wf-step" id="step-so">
+        <div class="wf-step-title">Sales Order Details</div>
+        <input type="text" id="soDetailsInput" class="cmd-input-full" placeholder="e.g. S36135" maxlength="6" style="width:100%; height:34px; padding:0 10px; border-radius:6px; border:1.5px solid var(--border-md); background:var(--surface); color:var(--text); font-family:var(--ui); font-size:13px;" oninput="saveSoDetails()">
+      </div>
+
+      <!-- DIP Switch Reference -->
+      <div class="wf-step" id="step-dip">
+        <div class="wf-step-title">DIP Switch Reference — Alfie Addressing</div>
+        <div class="wf-step-desc">Verify each Alfie's DIP switch is set correctly before starting.</div>
+        <div class="dip-grid" id="dipGrid"></div>
+      </div>
+
+      <!-- Step 1: Count Alfie -->
+      <div class="wf-step" id="step-count">
+        <div class="wf-step-title" id="title-count">Step 1 — Count Alfies</div>
+        <div class="wf-step-desc">Reads serial numbers and firmware from all connected Alfies. Expects exactly 6.</div>
+        <button class="wf-btn" id="btnCount" onclick="runCountAlfie()">Count Alfie</button>
+        <div class="wf-status" id="countStatus"></div>
+      </div>
+
+      <!-- Step 2: UBIE Numeration -->
+      <div class="wf-step hidden" id="step-numeration">
+        <div class="wf-step-title" id="title-numeration">Step 2 — UBIE Numeration</div>
+        <div class="wf-step-desc">Close all doors first, then confirm to begin.</div>
+        <button class="wf-btn success" id="btnCloseDoorsConfirm" onclick="confirmDoorsClosed()">✓ All doors are closed</button>
+        <div id="numerationInstructions" style="display:none; margin-top:10px;">
+          <div class="wf-step-desc">Get a device with Type-C/USB power. When each door opens, connect the cable from the locker to the device, then confirm.</div>
+          <button class="wf-btn" id="btnNumerationStart" onclick="startNumeration()">Start Numeration</button>
+        </div>
+        <div id="numerationProgress" style="display:none; margin-top:10px;"></div>
+        <div class="wf-status" id="numerationStatus"></div>
+      </div>
+
+      <!-- Step 3: Count UBIEs -->
+      <div class="wf-step" id="step-ubie">
+        <div class="wf-step-title" id="title-ubie">Step 3 — Count UBIEs</div>
+        <div class="wf-step-desc">Reads serial numbers, firmware, device status, and power source from all connected UBIEs. Expected count is based on the Alfies found in Step 1 (4 per Alfie).</div>
+        <button class="wf-btn" id="btnCountUbie" onclick="runCountUbie()">Count UBIE</button>
+        <div class="wf-status" id="ubieCountStatus"></div>
+      </div>
+
+      <!-- Step 4: Cabinet Verification -->
+      <div class="wf-step hidden" id="step-cabinet">
+        <div class="wf-step-title" id="title-cabinet">Step 4 — Cabinet Verification</div>
+        <div class="wf-step-desc">Doors open one at a time across the cabinets found in Step 1 (16 ports each). Connect the test device to the port as each door opens.</div>
+        <button class="wf-btn" id="btnCabinetStart" onclick="startCabinetStep()">Start Cabinet Verification</button>
+        <div id="cabinetProgress" style="display:none; margin-top:10px;"></div>
+        <div class="wf-status" id="cabinetStatus"></div>
+      </div>
+
+      <!-- Final Step: Download Records -->
+      <div class="wf-step" id="step-download">
+        <div class="wf-step-title">Final Step — Download Records</div>
+        <div class="wf-step-desc">One click downloads the command log, then the full report, automatically.</div>
+        <button class="wf-btn" id="btnDownloadAll" onclick="downloadAllStep()">Download Log &amp; Report</button>
+        <div class="wf-status" id="downloadStepStatus"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RIGHT: Results -->
+  <div class="right-panel">
+    <div id="apiWarn" class="api-warn" style="display:none;">
+      <strong>Web Serial API unavailable.</strong> Use Chrome, Edge, or Firefox 151+ on HTTPS/localhost.
+    </div>
+    <div class="log-header">
+      <span class="log-title">Results</span>
+      <div class="log-actions">
+        <button class="log-btn" onclick="clearResults()">Clear</button>
+      </div>
+    </div>
+    <div class="results-wrap" id="resultsWrap"></div>
+  </div>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  Lowe's Final Test — Script
+// ══════════════════════════════════════════════
+
+const HAS_API = ('serial' in navigator);
+const EXPECTED_ALFIE_FIRMWARE = '2.0.396';
+const EXPECTED_UBIE_FIRMWARE = '1.0.1878';
+let port = null, writer = null;
+let portLabel = 'PORT';
+let rawLog = [];  // { ts: Date, dir: 'TX'|'RX', text: string }
+
+// ── Helpers ──
+function hex(v) { return (v||0).toString(16).padStart(4,'0').toUpperCase(); }
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+function eolSuffix() {
+  const v = document.getElementById('eolSelect').value;
+  if (v === 'CR') return '\r'; if (v === 'LF') return '\n'; return '\r\n';
+}
+
+// ── Little-endian helpers ──
+function swapHex16(hex4) {
+  if (hex4.length !== 4) return hex4;
+  return hex4.substring(2, 4) + hex4.substring(0, 2);
+}
+function swapBytesHex(hex) {
+  const bytes = [];
+  for (let i = 0; i < hex.length; i += 2) bytes.push(hex.substring(i, i + 2));
+  return bytes.reverse().join('');
+}
+
+// ── Send command ──
+async function sendCmd(raw) {
+  const full = raw + eolSuffix();
+  const encoded = new TextEncoder().encode(full);
+  if (writer) {
+    await writer.write(encoded);
+    rawLog.push({ ts: new Date(), dir: 'TX', text: raw });
+  }
+}
+
+// ── Timestamp OFF ──
+async function sendTimestampOff() {
+  const cmds = ['C','Z0','O'];
+  for (const c of cmds) { await sendCmd(c); await delay(150); }
+  document.getElementById('tsBtn').textContent = '⏱ Timestamp: OFF';
+  document.getElementById('tsBtn').className = 'tb-btn ts-off';
+  addResult('Timestamp turned OFF', 'info');
+}
+
+// ── Port ──
+let readerLoopActive = false;
+let activeReader = null;
+let readerDone = Promise.resolve();
+let rxCallback = null;
+let rxLines = [];
+
+async function openPort() {
+  if (!HAS_API) { addResult('Web Serial API unavailable.', 'err'); return; }
+  try {
+    port = await navigator.serial.requestPort();
+    const baud = parseInt(document.getElementById('baudSelect').value);
+    await port.open({ baudRate: baud });
+    const info = port.getInfo();
+    writer = port.writable.getWriter();
+    portLabel = `VID${hex(info.usbVendorId)}`;
+    addResult(`Port opened — VID:0x${hex(info.usbVendorId)} PID:0x${hex(info.usbProductId)} @ ${baud} baud`, 'ok');
+    setConnected(true);
+    startReader();
+    // Auto timestamp off
+    await delay(300);
+    await sendTimestampOff();
+  } catch(e) {
+    addResult('Failed to open port: ' + e.message, 'err');
+    port = null; writer = null;
+  }
+}
+
+function startReader() {
+  readerDone = (async () => {
+    readerLoopActive = true;
+    let lineBuffer = '';
+    let flushTimer = null;
+
+    function splitOnT(str) {
+      return str.split(/(?=[Tt])/).map(s => s.trim()).filter(s => s.length > 0);
+    }
+
+    function scheduleFlush() {
+      if (flushTimer) clearTimeout(flushTimer);
+      flushTimer = setTimeout(() => {
+        if (lineBuffer.trim()) {
+          splitOnT(lineBuffer.trim()).forEach(seg => {
+            rxLines.push(seg);
+            rawLog.push({ ts: new Date(), dir: 'RX', text: seg });
+            if (rxCallback) rxCallback(seg);
+          });
+          lineBuffer = '';
+        }
+        flushTimer = null;
+      }, 100);
+    }
+
+    try {
+      while (port && port.readable && readerLoopActive) {
+        activeReader = port.readable.getReader();
+        try {
+          while (true) {
+            const { value, done } = await activeReader.read();
+            if (done) break;
+            if (!value) continue;
+            const chunk = new TextDecoder().decode(value);
+            for (const ch of chunk) {
+              if (ch === '\r') continue;
+              if (ch === '\n') {
+                if (lineBuffer.trim()) {
+                  splitOnT(lineBuffer.trim()).forEach(seg => {
+                    rxLines.push(seg);
+                    rawLog.push({ ts: new Date(), dir: 'RX', text: seg });
+                    if (rxCallback) rxCallback(seg);
+                  });
+                }
+                lineBuffer = '';
+              } else {
+                lineBuffer += ch;
+              }
+            }
+            scheduleFlush();
+          }
+        } catch (err) {
+          if (readerLoopActive && err.name !== 'AbortError') {
+            addResult('Read error: ' + err.message, 'err');
+          }
+        } finally {
+          try { activeReader.releaseLock(); } catch(_) {}
+          activeReader = null;
+        }
+      }
+    } catch(e) { if (readerLoopActive) addResult('Reader error: ' + e.message, 'err'); }
+    readerLoopActive = false;
+  })();
+}
+
+async function closePort() {
+  readerLoopActive = false;
+  if (activeReader) { try { await activeReader.cancel(); } catch(_) {} }
+  await readerDone;
+  try {
+    if (writer) { try { writer.releaseLock(); } catch(_) {} writer = null; }
+    if (port) { try { await port.close(); } catch(e) { addResult('Error closing: ' + e.message, 'err'); } port = null; }
+    addResult('Port closed.', 'info');
+  } catch(e) { addResult('Disconnect error: ' + e.message, 'err'); }
+  setConnected(false);
+}
+
+function setConnected(open) {
+  document.getElementById('connectBtn').style.display = open ? 'none' : '';
+  document.getElementById('disconnectBtn').style.display = open ? '' : 'none';
+  document.getElementById('statusDot').className = 'status-dot' + (open ? ' open' : '');
+}
+
+// ── Results panel ──
+function addResult(msg, cls) {
+  const wrap = document.getElementById('resultsWrap');
+  const row = document.createElement('div');
+  row.className = 'res-row ' + (cls || '');
+  row.textContent = msg;
+  wrap.appendChild(row);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function addResultHTML(html) {
+  const wrap = document.getElementById('resultsWrap');
+  const el = document.createElement('div');
+  el.innerHTML = html;
+  wrap.appendChild(el);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function clearResults() {
+  document.getElementById('resultsWrap').innerHTML = '';
+}
+
+// ── Collect RX lines with timeout ──
+function collectResponses(filter, timeout, maxCount) {
+  return new Promise(resolve => {
+    const collected = [];
+    let timer = null;
+    let settled = false;
+    const waitForever = !timeout || timeout <= 0;
+
+    function done() {
+      if (settled) return;
+      settled = true;
+      rxCallback = null;
+      if (timer) clearTimeout(timer);
+      resolve(collected);
+    }
+
+    if (!waitForever) timer = setTimeout(done, timeout);
+
+    rxCallback = (line) => {
+      if (line === 'z') return; // transceiver ack, skip
+      if (filter(line)) {
+        collected.push(line);
+        if (waitForever) {
+          // Resolve immediately once we have enough (or after this single match if no maxCount)
+          if (maxCount && collected.length >= maxCount) { done(); return; }
+          if (!maxCount) done();
+          return;
+        }
+        // Reset timer on each response to allow more to come
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(done, 300);
+        if (maxCount && collected.length >= maxCount) done();
+      }
+    };
+  });
+}
+
+// ── Alfie Register decoders (little-endian) ──
+let alfieData = {};  // Global — persists across steps
+function decodeAlfieSerial(valueHex) {
+  if (valueHex.length < 8) return valueHex.toUpperCase();
+  return swapBytesHex(valueHex.substring(0, 8)).toUpperCase();
+}
+
+function decodeAlfieFirmware(valueHex) {
+  if (valueHex.length < 8) return valueHex.toUpperCase();
+  const major = parseInt(valueHex.substring(0, 2), 16);
+  const minor = parseInt(valueHex.substring(2, 4), 16);
+  const build = parseInt(swapHex16(valueHex.substring(4, 8)), 16);
+  if (isNaN(major) || isNaN(minor) || isNaN(build)) return valueHex.toUpperCase();
+  return `${major}.${minor}.${build}`;
+}
+
+// ── Step 1: Count Alfie ──
+async function runCountAlfie() {
+  const btn = document.getElementById('btnCount');
+  const status = document.getElementById('countStatus');
+  status.className = 'wf-status info';
+  status.textContent = 'Reading serial numbers…';
+
+  // Clear previous results
+  clearResults();
+
+  // 1. Serial Numbers
+  addResult('Sending: Read Serial Numbers (broadcast)…', 'cmd');
+  await sendCmd('t00F25223');
+  const snResponses = await collectResponses(
+    line => line.length >= 7 && line[0].toLowerCase() === 't' && line[3].toUpperCase() === 'F' && line.substring(5,7) === '72' && line.substring(7,9) === '23',
+    2000, 6
+  );
+  addResult(`Received ${snResponses.length} serial number response(s)`, 'info');
+
+  // 2. Firmware Versions
+  await delay(300);
+  status.textContent = 'Reading firmware versions…';
+  addResult('Sending: Read Firmware Versions (broadcast)…', 'cmd');
+  await sendCmd('t00F25276');
+  const fwResponses = await collectResponses(
+    line => line.length >= 7 && line[0].toLowerCase() === 't' && line[3].toUpperCase() === 'F' && line.substring(5,7) === '72' && line.substring(7,9) === '76',
+    2000, 6
+  );
+  addResult(`Received ${fwResponses.length} firmware response(s)`, 'info');
+
+  // 3. Latch Over-Load Current Limit
+  await delay(300);
+  status.textContent = 'Reading current limits…';
+  addResult('Sending: Read Latch Over-Load Current Limit (broadcast)…', 'cmd');
+  await sendCmd('t00F2520D');
+  const clResponses = await collectResponses(
+    line => line.length >= 7 && line[0].toLowerCase() === 't' && line[3].toUpperCase() === 'F' && line.substring(5,7) === '72' && line.substring(7,9).toLowerCase() === '0d',
+    2000, 6
+  );
+  addResult(`Received ${clResponses.length} current limit response(s)`, 'info');
+
+  // 4. LED Mode (register 1601)
+  await delay(300);
+  status.textContent = 'Reading LED modes…';
+  addResult('Sending: Read LED Mode (broadcast)…', 'cmd');
+  await sendCmd('t00F3521601');
+  const ledResponses = await collectResponses(
+    line => line.length >= 7 && line[0].toLowerCase() === 't' && line[3].toUpperCase() === 'F' && line.substring(5,7) === '72' && line.substring(7,11).toLowerCase() === '1601',
+    2000, 6
+  );
+  addResult(`Received ${ledResponses.length} LED mode response(s)`, 'info');
+
+  // Build lookup maps
+  alfieData = {};
+
+  snResponses.forEach(line => {
+    const addr = line.substring(1, 3).toUpperCase();
+    const valueHex = line.substring(9);
+    if (!alfieData[addr]) alfieData[addr] = {};
+    alfieData[addr].serial = decodeAlfieSerial(valueHex);
+  });
+
+  fwResponses.forEach(line => {
+    const addr = line.substring(1, 3).toUpperCase();
+    const valueHex = line.substring(9);
+    if (!alfieData[addr]) alfieData[addr] = {};
+    alfieData[addr].firmware = decodeAlfieFirmware(valueHex);
+  });
+
+  clResponses.forEach(line => {
+    const addr = line.substring(1, 3).toUpperCase();
+    const valueHex = line.substring(9);
+    if (!alfieData[addr]) alfieData[addr] = {};
+    const raw = parseInt(swapHex16(valueHex.substring(0, 4)), 16);
+    alfieData[addr].currentLimit = isNaN(raw) ? valueHex.toUpperCase() : `${raw}mA`;
+  });
+
+  ledResponses.forEach(line => {
+    const addr = line.substring(1, 3).toUpperCase();
+    const valueHex = line.substring(11); // after 721601
+    if (!alfieData[addr]) alfieData[addr] = {};
+    const raw = valueHex.substring(0, 4).toUpperCase();
+    if (raw === 'FFFF') alfieData[addr].ledMode = 'Old RGB Harness Mode';
+    else if (raw === '0300') alfieData[addr].ledMode = 'New Waterfall PCB';
+    else alfieData[addr].ledMode = `Unknown (${raw})`;
+  });
+
+  // Build table
+  const addresses = Object.keys(alfieData).sort();
+  const count = addresses.length;
+  let alfieFirmwareMismatch = false;
+
+  // Cabinet Verification (Step 4) should only run for as many Alfies as were
+  // actually found here — rebuild the expected wiring map to match.
+  CABINET_COUNT = count;
+  EXPECTED_MAP = buildExpectedMap();
+
+  let tableHTML = `<div class="result-card">
+    <div class="result-card-title">Connected Alfie(s) — ${count} found</div>
+    <table class="result-table">
+      <tr><th>SN</th><th>Address</th><th>Serial No.</th><th>Firmware</th><th>Current Limit</th><th>LED Mode</th></tr>`;
+
+  addresses.forEach((addr, i) => {
+    const d = alfieData[addr];
+    const addrDec = parseInt(addr, 16);
+    const fwMatch = d.firmware === EXPECTED_ALFIE_FIRMWARE;
+    if (!fwMatch) alfieFirmwareMismatch = true;
+    tableHTML += `<tr>
+      <td>${i + 1}</td>
+      <td>${addr} (${addrDec})</td>
+      <td>${d.serial || '—'}</td>
+      <td class="${fwMatch ? 'pass' : 'fail'}">${d.firmware || '—'}${fwMatch ? '' : ' ⚠'}</td>
+      <td>${d.currentLimit || '—'}</td>
+      <td>${d.ledMode || '—'}</td>
+    </tr>`;
+  });
+
+  tableHTML += '</table></div>';
+  addResultHTML(tableHTML);
+
+  if (alfieFirmwareMismatch) {
+    addResultHTML(`<div class="result-card" style="padding:10px 14px;">
+      <span style="color:var(--red); font-weight:700; font-size:12px;">⚠ Firmware Not Updated</span>
+      <span style="font-size:12px; color:var(--text-muted); margin-left:8px;">One or more Alfies are not on expected firmware ${EXPECTED_ALFIE_FIRMWARE}. Continuing workflow.</span>
+    </div>`);
+  }
+
+  // Validate count
+  if (count === 6) {
+    status.className = 'wf-status ok';
+    status.textContent = `✓ All 6 Alfies detected`;
+  } else {
+    status.className = 'wf-status err';
+    status.textContent = `✗ Expected 6 Alfies, found ${count}`;
+    const pad2 = n => String(n).padStart(2, '0');
+    addResultHTML(`<div class="result-card" style="padding:10px 14px;">
+      <span style="color:var(--red); font-weight:700; font-size:12px;">✗ Alfie Count Mismatch</span>
+      <span style="font-size:12px; color:var(--text-muted); margin-left:8px;">Expected Alfies ${pad2(6)} and Actual Alfies ${pad2(count)} - Mismatched. Continuing workflow.</span>
+    </div>`);
+  }
+
+  // ── Auto-set Current Limit / LED Mode (New Waterfall PCB values) in background ──
+  status.textContent += ' — Setting production values…';
+  addResult('Sending: Set Current Limit → t00F4570D6009', 'cmd');
+  await sendCmd('t00F4570D6009');
+  await delay(500);
+
+  addResult('Sending: Set LED Mode → t00F55716010300', 'cmd');
+  await sendCmd('t00F55716010300');
+  await delay(500);
+
+  // Read back to verify
+  addResult('Sending: Read Current Limit (verify)…', 'cmd');
+  await sendCmd('t00F2520D');
+  const clVerify = await collectResponses(
+    line => line.length >= 7 && line[0].toLowerCase() === 't' && line[3].toUpperCase() === 'F' && line.substring(5,7) === '72' && line.substring(7,9).toLowerCase() === '0d',
+    2000, 6
+  );
+
+  await delay(300);
+  addResult('Sending: Read LED Mode (verify)…', 'cmd');
+  await sendCmd('t00F3521601');
+  const ledVerify = await collectResponses(
+    line => line.length >= 7 && line[0].toLowerCase() === 't' && line[3].toUpperCase() === 'F' && line.substring(5,7) === '72' && line.substring(7,11).toLowerCase() === '1601',
+    2000, 6
+  );
+
+  const expectedCurrent = '2400mA';
+  const expectedLed = 'New Waterfall PCB';
+
+  clVerify.forEach(line => {
+    const vAddr = line.substring(1, 3).toUpperCase();
+    const valueHex = line.substring(9);
+    const raw = parseInt(swapHex16(valueHex.substring(0, 4)), 16);
+    if (!alfieData[vAddr]) alfieData[vAddr] = {};
+    alfieData[vAddr].currentLimit = isNaN(raw) ? valueHex.toUpperCase() : `${raw}mA`;
+  });
+
+  ledVerify.forEach(line => {
+    const vAddr = line.substring(1, 3).toUpperCase();
+    const valueHex = line.substring(11);
+    if (!alfieData[vAddr]) alfieData[vAddr] = {};
+    const raw = valueHex.substring(0, 4).toUpperCase();
+    if (raw === 'FFFF') alfieData[vAddr].ledMode = 'Old RGB Harness Mode';
+    else if (raw === '0300') alfieData[vAddr].ledMode = 'New Waterfall PCB';
+    else alfieData[vAddr].ledMode = `Unknown (${raw})`;
+  });
+
+  let verifyTableHTML = `<div class="result-card">
+    <div class="result-card-title">Production Values Verification</div>
+    <table class="result-table">
+      <tr><th>Address</th><th>Current Limit</th><th>LED Mode</th></tr>`;
+
+  let allMatch = true;
+  addresses.forEach(vAddr => {
+    const vAddrDec = parseInt(vAddr, 16);
+    const d = alfieData[vAddr] || {};
+    const clMatch = d.currentLimit === expectedCurrent;
+    const ledMatch = d.ledMode === expectedLed;
+    if (!clMatch || !ledMatch) allMatch = false;
+    verifyTableHTML += `<tr>
+      <td>${vAddr} (${vAddrDec})</td>
+      <td class="${clMatch ? 'pass' : 'fail'}">${d.currentLimit || '—'}</td>
+      <td class="${ledMatch ? 'pass' : 'fail'}">${d.ledMode || '—'}</td>
+    </tr>`;
+  });
+  verifyTableHTML += '</table></div>';
+  addResultHTML(verifyTableHTML);
+
+  if (allMatch) {
+    status.className = 'wf-status ok';
+    status.textContent = `✓ All Alfies set to production values`;
+  } else {
+    status.className = 'wf-status err';
+    status.textContent = `✗ Some Alfies did not update correctly`;
+  }
+}
+
+// ── Step 2: UBIE Numeration ──
+let foundAlfieAddrs = [];
+
+// Sequence: For each found Alfie (in order), open latches 01, 05, 09, 0D.
+// Each open triggers an Address Assigned response (4F) with sequential hex addresses.
+const NUMERATION_LATCHES = ['01', '05', '09', '0D'];
+let numerationSequence = [];   // [{ alfieAddr, alfieDec, latch, expectedUbieAddr, ubieAddrDec }]
+let numerationIndex = 0;
+let numerationResults = {};    // { ubieAddrDec: { alfieAddr, latch, connected: bool } }
+
+function buildNumerationSequence() {
+  foundAlfieAddrs = Object.keys(alfieData).sort();
+  numerationSequence = [];
+  let ubieCounter = 1;
+  foundAlfieAddrs.forEach(alfieAddr => {
+    const alfieDec = parseInt(alfieAddr, 16);
+    NUMERATION_LATCHES.forEach(latch => {
+      const ubieAddrHex = ubieCounter.toString(16).padStart(2, '0').toUpperCase();
+      numerationSequence.push({
+        alfieAddr, alfieDec, latch,
+        expectedUbieAddr: ubieAddrHex,
+        ubieAddrDec: ubieCounter,
+      });
+      ubieCounter++;
+    });
+  });
+}
+
+function confirmDoorsClosed() {
+  document.getElementById('btnCloseDoorsConfirm').textContent = '✓ Doors closed confirmed';
+  document.getElementById('numerationInstructions').style.display = 'block';
+  addResult('── UBIE Numeration ──', 'info');
+  addResult('All doors confirmed closed.', 'ok');
+}
+
+async function startNumeration() {
+  const btn = document.getElementById('btnNumerationStart');
+  const status = document.getElementById('numerationStatus');
+  const progressDiv = document.getElementById('numerationProgress');
+  progressDiv.style.display = 'block';
+
+  buildNumerationSequence();
+  numerationIndex = 0;
+  numerationResults = {};
+
+  // Send AUTO_CAN_ADDRESS first
+  status.className = 'wf-status info';
+  status.textContent = 'Enabling Auto CAN Address mode…';
+  addResult('Sending: Enter Auto Address UBIE → t00A24101', 'cmd');
+  await sendCmd('t00A24101');
+  await delay(500);
+
+  // Render progress list
+  progressDiv.innerHTML = numerationSequence.map((step, i) => {
+    return `<div class="dip-card" id="num-step-${i}" style="text-align:left; padding:8px 10px; margin-bottom:6px;">
+      <span style="font-size:11px; font-weight:600;">Alfie ${step.alfieDec} — Open Latch ${parseInt(step.latch, 16)} → expecting UBIE ${step.ubieAddrDec}</span>
+      <span class="sd-result" id="num-result-${i}" style="display:inline-block; margin-left:8px;"></span>
+    </div>`;
+  }).join('');
+
+  await runNumerationStep();
+}
+
+async function runNumerationStep() {
+  const status = document.getElementById('numerationStatus');
+
+  if (numerationIndex >= numerationSequence.length) {
+    // All done
+    showNumerationSummary();
+    return;
+  }
+
+  const step = numerationSequence[numerationIndex];
+  const stepEl = document.getElementById('num-step-' + numerationIndex);
+  const resultEl = document.getElementById('num-result-' + numerationIndex);
+  if (stepEl) stepEl.style.borderColor = 'var(--blue)';
+
+  status.className = 'wf-status info';
+  status.textContent = `Alfie ${step.alfieDec}: Opening latch ${parseInt(step.latch, 16)}…`;
+
+  const openCmd = `t${step.alfieAddr}F24f${step.latch}`;
+  addResult(`Sending: Alfie ${step.alfieDec} Open Latch ${parseInt(step.latch, 16)} → ${openCmd}`, 'cmd');
+  await sendCmd(openCmd);
+
+  // Wait for Address Assigned response: t{ubieAddr}A24F4B (no timeout — wait until received)
+  const responses = await collectResponses(
+    line => {
+      if (line.length < 9) return false;
+      if (line[0].toLowerCase() !== 't') return false;
+      if (line[3].toUpperCase() !== 'A') return false;
+      if (line.substring(5, 7).toLowerCase() !== '4f') return false;
+      if (line.substring(7, 9).toLowerCase() !== '4b') return false;
+      return true;
+    },
+    0, 1
+  );
+
+  if (responses.length > 0) {
+    const line = responses[0];
+    const assignedAddr = line.substring(1, 3).toUpperCase();
+    const assignedDec = parseInt(assignedAddr, 16);
+    const matches = assignedAddr === step.expectedUbieAddr;
+    numerationResults[step.ubieAddrDec] = {
+      alfieAddr: step.alfieAddr, alfieDec: step.alfieDec, latch: step.latch,
+      connected: true, assignedAddr, assignedDec, matches,
+    };
+    if (stepEl) stepEl.style.borderColor = matches ? 'var(--green)' : 'var(--amber)';
+    if (resultEl) {
+      resultEl.textContent = matches ? `✓ UBIE ${assignedDec} assigned` : `⚠ Got UBIE ${assignedDec} (expected ${step.ubieAddrDec})`;
+      resultEl.style.color = matches ? 'var(--green)' : 'var(--amber)';
+    }
+    addResult(`UBIE address assigned: 0x${assignedAddr} (${assignedDec})`, 'ok');
+  } else {
+    numerationResults[step.ubieAddrDec] = {
+      alfieAddr: step.alfieAddr, alfieDec: step.alfieDec, latch: step.latch,
+      connected: false,
+    };
+    if (stepEl) stepEl.style.borderColor = 'var(--red)';
+    if (resultEl) { resultEl.textContent = '✗ No UBIE connected'; resultEl.style.color = 'var(--red)'; }
+    addResult(`No Address Assigned response for Alfie ${step.alfieDec} Latch ${parseInt(step.latch, 16)}`, 'err');
+  }
+
+  numerationIndex++;
+  await runNumerationStep();
+}
+
+function showNumerationSummary() {
+  const status = document.getElementById('numerationStatus');
+
+  let tableHTML = `<div class="result-card">
+    <div class="result-card-title">UBIE Numeration Summary</div>
+    <table class="result-table">
+      <tr><th>SN</th><th>Alfie Address</th><th>Expected UBIE</th><th>Actual UBIE</th><th>Result</th></tr>`;
+
+  let allOk = true;
+
+  foundAlfieAddrs.forEach((alfieAddr, sn) => {
+    const alfieDec = parseInt(alfieAddr, 16);
+    const group = numerationSequence.filter(s => s.alfieAddr === alfieAddr);
+    group.forEach((step, i) => {
+      const res = numerationResults[step.ubieAddrDec];
+      const connected = res && res.connected;
+      const matches = connected && res.matches;
+      if (!matches) allOk = false;
+      tableHTML += '<tr>';
+      if (i === 0) {
+        tableHTML += `<td rowspan="${group.length}" style="vertical-align:middle;">${sn + 1}</td>`;
+        tableHTML += `<td rowspan="${group.length}" style="vertical-align:middle;">${alfieAddr}</td>`;
+      }
+      tableHTML += `<td>${step.expectedUbieAddr} (${step.ubieAddrDec})</td>`;
+      tableHTML += `<td class="${matches ? 'pass' : 'fail'}">${connected ? `${res.assignedAddr} (${res.assignedDec})` : '—'}</td>`;
+      tableHTML += `<td class="${matches ? 'pass' : 'fail'}">${matches ? 'OK' : (connected ? 'MISMATCH' : 'NO RESPONSE')}</td>`;
+      tableHTML += '</tr>';
+    });
+  });
+
+  tableHTML += '</table></div>';
+  addResultHTML(tableHTML);
+
+  status.className = allOk ? 'wf-status ok' : 'wf-status warn';
+  status.textContent = allOk ? '✓ All UBIEs connected at their expected address' : '⚠ Some UBIEs are missing or at the wrong address';
+
+  addResultHTML(`<div class="result-card" style="padding:14px; display:flex; align-items:center; gap:12px;">
+    <span style="font-size:13px; font-weight:600; color:var(--text);">Is this correct?</span>
+    <button class="wf-btn success" onclick="confirmNumeration(true)" style="height:30px; padding:0 16px; font-size:12px;">Yes, Continue</button>
+    <button class="wf-btn danger" onclick="confirmNumeration(false)" style="height:30px; padding:0 16px; font-size:12px;">No, Re-run</button>
+  </div>`);
+}
+
+function confirmNumeration(correct) {
+  if (correct) {
+    addResult('UBIE Numeration confirmed.', 'ok');
+  } else {
+    addResult('Re-running UBIE Numeration…', 'info');
+    document.getElementById('btnNumerationStart').disabled = false;
+    document.getElementById('numerationProgress').innerHTML = '';
+    document.getElementById('numerationStatus').textContent = '';
+    clearResults();
+    addResult('── UBIE Numeration (Re-run) ──', 'info');
+  }
+}
+
+// ── UBIE decoders (big-endian, no byte swap) ──
+let ubieData = {};  // Global — persists across steps
+
+function decodeUbieSerial(valueHex) {
+  return valueHex.toUpperCase();
+}
+
+function decodeUbieFirmware(valueHex) {
+  if (valueHex.length < 8) return valueHex.toUpperCase();
+  const major = parseInt(valueHex.substring(0, 2), 16);
+  const minor = parseInt(valueHex.substring(2, 4), 16);
+  const build = parseInt(valueHex.substring(4, 8), 16);
+  if (isNaN(major) || isNaN(minor) || isNaN(build)) return valueHex.toUpperCase();
+  return `${major}.${minor}.${build}`;
+}
+
+function decodeUbieDeviceStatus(stateHex, layoutHex) {
+  let status = 'No Problems';
+  if (stateHex === '01') status = 'Warnings';
+  else if (stateHex === '02') status = 'Failures';
+  const layout = parseInt(layoutHex, 16);
+  const ports = [];
+  if (layout & 1) ports.push('1');
+  if (layout & 2) ports.push('2');
+  if (layout & 4) ports.push('3');
+  if (layout & 8) ports.push('4');
+  const portStr = ports.length ? `Port ${ports.join(', ')}` : 'No Port';
+  return `${status}, ${portStr}`;
+}
+
+// ── Step 3: Count UBIEs ──
+async function runCountUbie() {
+  const btn = document.getElementById('btnCountUbie');
+  const status = document.getElementById('ubieCountStatus');
+  status.className = 'wf-status info';
+  status.textContent = 'Reading UBIE serial numbers…';
+
+  addResult('── UBIE Discovery ──', 'info');
+
+  // 1. Serial Numbers
+  addResult('Sending: Read UBIE Serial Numbers (broadcast)…', 'cmd');
+  await sendCmd('t00A173');
+  const snResponses = await collectResponses(
+    line => line.length >= 7 && line[0].toLowerCase() === 't' && line[3].toUpperCase() === 'A' && line.substring(5,7) === '72' && line.substring(7,9) === '73',
+    4000, 24
+  );
+  addResult(`Received ${snResponses.length} UBIE serial number response(s)`, 'info');
+
+  // 2. Firmware Versions
+  await delay(300);
+  status.textContent = 'Reading UBIE firmware versions…';
+  addResult('Sending: Read UBIE Firmware Versions (broadcast)…', 'cmd');
+  await sendCmd('t00A25200');
+  const fwResponses = await collectResponses(
+    line => line.length >= 7 && line[0].toLowerCase() === 't' && line[3].toUpperCase() === 'A' && line.substring(5,7) === '72' && line.substring(7,9) === '00',
+    4000, 24
+  );
+  addResult(`Received ${fwResponses.length} UBIE firmware response(s)`, 'info');
+
+  // 3. Device Status
+  await delay(300);
+  status.textContent = 'Reading UBIE device status…';
+  addResult('Sending: Read UBIE Device Status (broadcast)…', 'cmd');
+  await sendCmd('t00A153');
+  const dsResponses = await collectResponses(
+    line => line.length >= 7 && line[0].toLowerCase() === 't' && line[3].toUpperCase() === 'A' && line.substring(5,7) === '69' && line.substring(7,9) === '73',
+    4000, 24
+  );
+  addResult(`Received ${dsResponses.length} UBIE device status response(s)`, 'info');
+
+  // 4. Power Source
+  await delay(300);
+  status.textContent = 'Reading UBIE power source…';
+  addResult('Sending: Read UBIE Power Source (broadcast)…', 'cmd');
+  await sendCmd('t00A156');
+  const psResponses = await collectResponses(
+    line => line.length >= 13 && line[0].toLowerCase() === 't' && line[3].toUpperCase() === 'A' && line.substring(5,7) === '69' && line.substring(7,9) === '56',
+    4000, 24
+  );
+  addResult(`Received ${psResponses.length} UBIE power source response(s)`, 'info');
+
+  // Build lookup maps
+  ubieData = {};
+
+  // Two physical UBIEs sharing one CAN address both answer every broadcast, which
+  // collides on the wire and produces exactly the kind of garbage/duplicate RX seen
+  // in the raw log (repeated frames, then FAILURE REPORT "Frame Received is Unknown").
+  // The serial number is baked into each device, so if one address reports more than
+  // one distinct serial across these responses, that address has two UBIEs on it.
+  const addrSerials = {};
+  snResponses.forEach(line => {
+    const addr = line.substring(1, 3).toUpperCase();
+    const valueHex = line.substring(9);
+    const serial = decodeUbieSerial(valueHex);
+    if (!ubieData[addr]) ubieData[addr] = {};
+    ubieData[addr].serial = serial;
+    if (!addrSerials[addr]) addrSerials[addr] = new Set();
+    addrSerials[addr].add(serial);
+  });
+  const duplicateAddresses = {}; // addr → array of distinct serials seen under it
+  Object.keys(addrSerials).forEach(addr => {
+    if (addrSerials[addr].size > 1) {
+      duplicateAddresses[addr] = Array.from(addrSerials[addr]);
+      ubieData[addr].duplicateAddress = true;
+      ubieData[addr].duplicateSerials = duplicateAddresses[addr];
+    }
+  });
+
+  fwResponses.forEach(line => {
+    const addr = line.substring(1, 3).toUpperCase();
+    const valueHex = line.substring(9);
+    if (!ubieData[addr]) ubieData[addr] = {};
+    ubieData[addr].firmware = decodeUbieFirmware(valueHex);
+  });
+
+  dsResponses.forEach(line => {
+    const addr = line.substring(1, 3).toUpperCase();
+    if (line.length >= 13) {
+      const stateHex = line.substring(9, 11).toLowerCase();
+      const layoutHex = line.substring(11, 13).toLowerCase();
+      if (!ubieData[addr]) ubieData[addr] = {};
+      ubieData[addr].deviceStatus = decodeUbieDeviceStatus(stateHex, layoutHex);
+    }
+  });
+
+  psResponses.forEach(line => {
+    const addr = line.substring(1, 3).toUpperCase();
+    const usbHex = line.substring(9, 11);
+    const rj45Hex = line.substring(11, 13);
+    const usbOk = usbHex === '01';
+    const rj45Ok = rj45Hex === '01';
+    if (!ubieData[addr]) ubieData[addr] = {};
+    // Each half colored independently: connected = green, not connected = red
+    ubieData[addr].powerSource = `USB(5V): <span class="${usbOk ? 'pass' : 'fail'}">${usbOk ? 'Yes' : 'No'}</span>, RJ45(12V): <span class="${rj45Ok ? 'pass' : 'fail'}">${rj45Ok ? 'Yes' : 'No'}</span>`;
+  });
+
+  // Build grouped table (SN, Alfie Address, UBIE SN, Address, Serial No., Firmware, Device Status)
+  const count = Object.keys(ubieData).length;
+  let ubieFirmwareMismatch = false;
+
+  let tableHTML = `<div class="result-card">
+    <div class="result-card-title">Connected UBIE(s) — ${count} found</div>
+    <table class="result-table">
+      <tr><th>SN</th><th>Alfie Address</th><th>UBIE SN</th><th>Address</th><th>Serial Number</th><th>Firmware</th><th>Device Status</th><th>Power Source</th></tr>`;
+
+  // Group by Alfie using the static cabinet map (Alfie 01–06 → 4 UBIEs each)
+  for (let c = 0; c < CABINET_COUNT; c++) {
+    const alfieDec = c + 1;
+    const alfieHex = alfieDec.toString(16).padStart(2, '0').toUpperCase();
+    // Unique UBIE hex addresses for this cabinet, in order
+    const seen = new Set();
+    const ubieHexList = [];
+    EXPECTED_MAP[c].forEach(entry => {
+      if (!seen.has(entry.ubieHex)) { seen.add(entry.ubieHex); ubieHexList.push(entry.ubieHex); }
+    });
+
+    ubieHexList.forEach((ubieHex, i) => {
+      const ubieDec = parseInt(ubieHex, 16);
+      const d = ubieData[ubieHex] || {};
+      const fwMatch = d.firmware === EXPECTED_UBIE_FIRMWARE;
+      if (d.firmware && !fwMatch) ubieFirmwareMismatch = true;
+      tableHTML += '<tr>';
+      if (i === 0) {
+        tableHTML += `<td rowspan="${ubieHexList.length}" style="vertical-align:middle;">${alfieDec}</td>`;
+        tableHTML += `<td rowspan="${ubieHexList.length}" style="vertical-align:middle;">${alfieHex} (${alfieDec})</td>`;
+      }
+      tableHTML += `<td>${ubieDec}</td>`;
+      tableHTML += `<td>${ubieHex}</td>`;
+      tableHTML += d.duplicateAddress
+        ? `<td class="fail">${d.duplicateSerials.join(' / ')} ⚠ Duplicate Address</td>`
+        : `<td>${d.serial || '—'}</td>`;
+      tableHTML += `<td class="${d.firmware ? (fwMatch ? 'pass' : 'fail') : ''}">${d.firmware || '—'}${d.firmware && !fwMatch ? ' ⚠' : ''}</td>`;
+      tableHTML += `<td>${d.deviceStatus || '—'}</td>`;
+      tableHTML += `<td>${d.powerSource || '—'}</td>`;
+      tableHTML += '</tr>';
+    });
+  }
+
+  tableHTML += '</table></div>';
+  addResultHTML(tableHTML);
+
+  if (ubieFirmwareMismatch) {
+    addResultHTML(`<div class="result-card" style="padding:10px 14px;">
+      <span style="color:var(--red); font-weight:700; font-size:12px;">⚠ Firmware Not Updated</span>
+      <span style="font-size:12px; color:var(--text-muted); margin-left:8px;">One or more UBIEs are not on expected firmware ${EXPECTED_UBIE_FIRMWARE}. Continuing workflow.</span>
+    </div>`);
+  }
+
+  Object.keys(duplicateAddresses).forEach(addr => {
+    addResultHTML(`<div class="result-card" style="padding:10px 14px;">
+      <span style="color:var(--red); font-weight:700; font-size:12px;">⚠ Duplicate CAN Address</span>
+      <span style="font-size:12px; color:var(--text-muted); margin-left:8px;">Address ${addr} answered with ${duplicateAddresses[addr].length} different serial numbers (${duplicateAddresses[addr].join(', ')}) — two or more UBIEs are set to the same address and are colliding on the bus. Check DIP switches and re-run.</span>
+    </div>`);
+  });
+
+  const expectedUbieCount = CABINET_COUNT * 4;
+  if (count === expectedUbieCount) {
+    status.className = 'wf-status ok';
+    status.textContent = `✓ All ${expectedUbieCount} UBIEs detected`;
+  } else {
+    status.className = 'wf-status err';
+    status.textContent = `✗ Expected ${expectedUbieCount} UBIEs, found ${count}`;
+    const pad2 = n => String(n).padStart(2, '0');
+    addResultHTML(`<div class="result-card" style="padding:10px 14px;">
+      <span style="color:var(--red); font-weight:700; font-size:12px;">✗ UBIE Count Mismatch</span>
+      <span style="font-size:12px; color:var(--text-muted); margin-left:8px;">Expected UBIEs ${pad2(expectedUbieCount)} and Actual UBIEs ${pad2(count)} - Mismatched. Continuing workflow.</span>
+    </div>`);
+  }
+}
+
+// ── Step 4: Cabinet Verification ──
+const CABINET_LATCHES = ['01','02','03','04','05','06','07','08','09','0A','0B','0C','0D','0E','0F','10'];
+let CABINET_COUNT = 6; // updated to match however many Alfies Step 1 actually found
+
+function buildExpectedMap() {
+  const map = [];
+  for (let c = 0; c < CABINET_COUNT; c++) {
+    const entries = [];
+    const ubieStartDec = c * 4 + 1;
+    CABINET_LATCHES.forEach((latch, i) => {
+      const group = Math.floor(i / 4);
+      const ubieDec = ubieStartDec + group;
+      const ubieHex = ubieDec.toString(16).padStart(2, '0').toUpperCase();
+      const port = (i % 4) + 1;
+      entries.push({ latch, ubieDec, ubieHex, port });
+    });
+    map.push(entries);
+  }
+  return map;
+}
+let EXPECTED_MAP = buildExpectedMap();
+
+let cabinetIndex = 0;
+let cabinetLatchIndex = 0;
+let currentCabinetResults = [];
+let allCabinetResults = [];
+
+async function startCabinetStep() {
+  cabinetIndex = 0;
+  allCabinetResults = [];
+  addResult('── Cabinet Verification ──', 'info');
+  await runCabinet();
+}
+
+async function runCabinet() {
+  if (cabinetIndex >= CABINET_COUNT) { finishCabinets(); return; }
+  const alfieDec = cabinetIndex + 1;
+  const alfieHex = alfieDec.toString(16).padStart(2, '0').toUpperCase();
+  currentCabinetResults = [];
+  cabinetLatchIndex = 0;
+
+  const status = document.getElementById('cabinetStatus');
+  status.className = 'wf-status info';
+  status.textContent = `Cabinet ${alfieDec}: starting…`;
+
+  const progressDiv = document.getElementById('cabinetProgress');
+  progressDiv.style.display = 'block';
+  progressDiv.innerHTML = `<div class="wf-step-desc">Cabinet ${alfieDec} (Alfie ${alfieHex}) — connect the test device to each port as its door opens.</div>` +
+    CABINET_LATCHES.map((latch, i) =>
+      `<div class="dip-card" id="comp-step-${i}" style="text-align:left; padding:6px 10px; margin-bottom:4px;">
+        <span style="font-size:11px; font-weight:600;">Latch ${latch}</span>
+        <span class="sd-result" id="comp-result-${i}" style="display:inline-block; margin-left:8px;"></span>
+      </div>`
+    ).join('');
+
+  addResult(`── Cabinet ${alfieDec} (Alfie ${alfieHex}) ──`, 'info');
+  await runCabinetLatch(alfieHex, alfieDec);
+}
+
+async function runCabinetLatch(alfieHex, alfieDec) {
+  const status = document.getElementById('cabinetStatus');
+
+  if (cabinetLatchIndex >= CABINET_LATCHES.length) {
+    allCabinetResults[cabinetIndex] = currentCabinetResults;
+    showCabinetTable(alfieHex, alfieDec);
+    cabinetIndex++;
+    await delay(300);
+    await runCabinet();
+    return;
+  }
+
+  const latch = CABINET_LATCHES[cabinetLatchIndex];
+  const stepEl = document.getElementById('comp-step-' + cabinetLatchIndex);
+  const resultEl = document.getElementById('comp-result-' + cabinetLatchIndex);
+  if (stepEl) stepEl.style.borderColor = 'var(--blue)';
+
+  status.textContent = `Cabinet ${alfieDec}: opening latch ${latch}…`;
+
+  const openCmd = `t${alfieHex}F24f${latch}`;
+  addResult(`Sending: Alfie ${alfieDec} Open Latch ${parseInt(latch, 16)} → ${openCmd}`, 'cmd');
+  await sendCmd(openCmd);
+
+  // Wait indefinitely for Device Connected: t{ubie}A46963{port}01
+  const responses = await collectResponses(
+    line => {
+      if (line.length < 13) return false;
+      if (line[0].toLowerCase() !== 't') return false;
+      if (line[3].toUpperCase() !== 'A') return false;
+      if (line.substring(5, 7) !== '69') return false;
+      if (line.substring(7, 9) !== '63') return false;
+      const state = line.substring(11, 13);
+      return state === '01';
+    },
+    0, 1
+  );
+
+  if (responses.length > 0) {
+    const line = responses[0];
+    const ubieHex = line.substring(1, 3).toUpperCase();
+    const ubieDec = parseInt(ubieHex, 16);
+    const port = parseInt(line.substring(9, 11), 16);
+    currentCabinetResults.push({ latch, ubieHex, ubieDec, port });
+    if (stepEl) stepEl.style.borderColor = 'var(--green)';
+    if (resultEl) { resultEl.textContent = `✓ UBIE ${ubieDec} Port ${port}`; resultEl.style.color = 'var(--green)'; }
+    addResult(`Device Connected: UBIE ${ubieDec} Port ${port}`, 'ok');
+  } else {
+    currentCabinetResults.push({ latch, ubieHex: null, ubieDec: null, port: null });
+    if (stepEl) stepEl.style.borderColor = 'var(--red)';
+    if (resultEl) { resultEl.textContent = '✗ No response'; resultEl.style.color = 'var(--red)'; }
+    addResult(`No Device Connected response for latch ${latch}`, 'err');
+  }
+
+  cabinetLatchIndex++;
+  await runCabinetLatch(alfieHex, alfieDec);
+}
+
+function showCabinetTable(alfieHex, alfieDec) {
+  let html = `<div class="result-card">
+    <div class="result-card-title">Cabinet ${alfieDec} — Verification</div>
+    <table class="result-table">
+      <tr><th>Comp No.</th><th>Alfie Address</th><th>Latch No.</th><th>UBIE Address</th><th>Port No.</th></tr>`;
+
+  currentCabinetResults.forEach((r, i) => {
+    html += '<tr>';
+    if (i === 0) {
+      html += `<td rowspan="${currentCabinetResults.length}" style="vertical-align:middle;">${alfieDec}</td>`;
+      html += `<td rowspan="${currentCabinetResults.length}" style="vertical-align:middle;">${alfieHex} (${alfieDec})</td>`;
+    }
+    html += `<td>${r.latch}</td>`;
+    html += `<td>${r.ubieHex ? `${r.ubieHex} (${r.ubieDec})` : '—'}</td>`;
+    html += `<td>${r.port !== null ? r.port : '—'}</td>`;
+    html += '</tr>';
+  });
+
+  html += '</table></div>';
+  addResultHTML(html);
+}
+
+function finishCabinets() {
+  const status = document.getElementById('cabinetStatus');
+  status.className = 'wf-status info';
+  status.textContent = 'All cabinets tested. Verifying wiring map…';
+
+  let allMatch = true;
+  let mapHtml = `<div class="result-card">
+    <div class="result-card-title">Final Wiring Map Verification</div>
+    <table class="result-table">
+      <tr><th>Comp SN</th><th>Alfie Address</th><th>Latch No.</th><th>Expected UBIE</th><th>Actual UBIE</th><th>Expected Port</th><th>Actual Port</th><th>Result</th></tr>`;
+
+  for (let c = 0; c < CABINET_COUNT; c++) {
+    const alfieDec = c + 1;
+    const alfieHex = alfieDec.toString(16).padStart(2, '0').toUpperCase();
+    const expected = EXPECTED_MAP[c];
+    const actual = allCabinetResults[c] || [];
+
+    expected.forEach((exp, i) => {
+      const act = actual[i] || {};
+      const ubieMatch = act.ubieHex === exp.ubieHex;
+      const portMatch = act.port === exp.port;
+      const rowOk = ubieMatch && portMatch;
+      if (!rowOk) allMatch = false;
+
+      mapHtml += '<tr>';
+      if (i === 0) {
+        mapHtml += `<td rowspan="16" style="vertical-align:middle;">${alfieDec}</td>`;
+        mapHtml += `<td rowspan="16" style="vertical-align:middle;">${alfieHex} (${alfieDec})</td>`;
+      }
+      mapHtml += `<td>${exp.latch}</td>`;
+      mapHtml += `<td>${exp.ubieHex} (${exp.ubieDec})</td>`;
+      mapHtml += `<td class="${ubieMatch ? 'pass' : 'fail'}">${act.ubieHex ? `${act.ubieHex} (${act.ubieDec})` : '—'}</td>`;
+      mapHtml += `<td>${exp.port}</td>`;
+      mapHtml += `<td class="${portMatch ? 'pass' : 'fail'}">${act.port !== null && act.port !== undefined ? act.port : '—'}</td>`;
+      mapHtml += `<td class="${rowOk ? 'pass' : 'fail'}">${rowOk ? 'OK' : 'MISMATCH'}</td>`;
+      mapHtml += '</tr>';
+    });
+  }
+
+  mapHtml += '</table></div>';
+  addResultHTML(mapHtml);
+
+  if (allMatch) {
+    status.className = 'wf-status ok';
+    status.textContent = '✓ Wiring map matches expected configuration';
+  } else {
+    status.className = 'wf-status err';
+    status.textContent = '✗ Wiring mismatches found — see highlighted rows above';
+  }
+}
+
+// ── Theme toggle ──
+// ── Numeration / Port Map toggles: show or hide their cards + renumber titles ──
+// All step cards are visible at once (no one-by-one reveal) so the user can jump to
+// any step in any order. The two optional cards (Numeration, Cabinet Verification)
+// are shown or hidden independently, purely based on their own toggle's current state.
+function updateStepTitles() {
+  const withNum = document.getElementById('numerationToggle').checked;
+  const withCabinet = document.getElementById('compartmentMapToggle').checked;
+
+  document.getElementById('step-numeration').classList.toggle('hidden', !withNum);
+  document.getElementById('step-cabinet').classList.toggle('hidden', !withCabinet);
+
+  let n = 1; // Step 1 is always Count Alfies
+  if (withNum) {
+    n++;
+    document.getElementById('title-numeration').textContent = `Step ${n} — UBIE Numeration`;
+  }
+  n++;
+  document.getElementById('title-ubie').textContent = `Step ${n} — Count UBIEs`;
+  if (withCabinet) {
+    n++;
+    document.getElementById('title-cabinet').textContent = `Step ${n} — Cabinet Verification`;
+  }
+}
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  const newTheme = isDark ? 'light' : 'dark';
+  html.setAttribute('data-theme', newTheme);
+  const btn = document.getElementById('themeBtn');
+  btn.innerHTML = newTheme === 'dark'
+    ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>'
+    : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+  try { localStorage.setItem('pw-theme', newTheme); } catch(_) {}
+}
+
+function applyStoredTheme() {
+  let theme = 'light';
+  try { theme = localStorage.getItem('pw-theme') || 'light'; } catch(_) {}
+  if (theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+  toggleTheme(); toggleTheme(); // sync button icon
+}
+
+// ── Tester name (browsers cannot read the OS username — this is the stand-in) ──
+function saveTesterName() {
+  const val = document.getElementById('testerNameInput').value;
+  try { localStorage.setItem('pw-tester-name', val); } catch(_) {}
+}
+
+function loadStoredTesterName() {
+  let name = '';
+  try { name = localStorage.getItem('pw-tester-name') || ''; } catch(_) {}
+  document.getElementById('testerNameInput').value = name;
+}
+
+function getTesterName() {
+  const el = document.getElementById('testerNameInput');
+  const v = el ? el.value.trim() : '';
+  return v || 'Unknown';
+}
+
+// ── Sales Order Details (never persisted — optional, not required to use any card) ──
+function saveSoDetails() {
+  // Intentionally not saved to localStorage: not required, entered fresh each run if used.
+}
+
+function getSoDetails() {
+  const el = document.getElementById('soDetailsInput');
+  const v = el ? el.value.trim() : '';
+  return v || 'Unknown';
+}
+
+// Strip characters that are unsafe in filenames
+function safeFilePart(s) {
+  return String(s).trim().replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, '_') || 'Unknown';
+}
+
+function fileTimestamp() {
+  const d = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+}
+
+// ── Download log ──
+// ── Dynamic library loaders ──
+function loadScript(urls) {
+  return new Promise((resolve, reject) => {
+    let idx = 0;
+    function tryNext() {
+      if (idx >= urls.length) { reject(new Error('Could not load library')); return; }
+      const s = document.createElement('script');
+      s.src = urls[idx++];
+      s.onload = resolve;
+      s.onerror = tryNext;
+      document.head.appendChild(s);
+    }
+    tryNext();
+  });
+}
+
+function loadJsPDF() {
+  if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve(window.jspdf.jsPDF);
+  return loadScript([
+    'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js',
+    'https://unpkg.com/jspdf@2.5.2/dist/jspdf.umd.min.js'
+  ]).then(() => window.jspdf.jsPDF);
+}
+
+function loadHtml2Canvas() {
+  if (window.html2canvas) return Promise.resolve(window.html2canvas);
+  return loadScript([
+    'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
+    'https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js'
+  ]).then(() => window.html2canvas);
+}
+
+function fmtLogTs(d) {
+  const pad = (n, l) => String(n).padStart(l || 2, '0');
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(d.getMilliseconds(),3)}`;
+}
+
+// ── Download Logs (raw TX/RX with timestamp, PDF) ──
+async function downloadBoth() {
+  await downloadLog();
+  await delay(400); // let the first save dialog/write settle before the next
+  await downloadReport();
+}
+
+// Toolbar button — available any time, doesn't touch the final-step UI
+async function downloadAllTop() {
+  const btn = document.getElementById('btnDownloadAllTop');
+  btn.textContent = '↓ Downloading…';
+  addResult('Downloading command log and report…', 'info');
+
+  await downloadBoth();
+
+  btn.textContent = '↓ Download Log & Report';
+}
+
+// Final workflow step — same action, with its own status line
+async function downloadAllStep() {
+  const btn = document.getElementById('btnDownloadAll');
+  const status = document.getElementById('downloadStepStatus');
+
+  status.className = 'wf-status info';
+  status.textContent = 'Downloading command log…';
+  await downloadLog();
+  await delay(400);
+
+  status.textContent = 'Downloading report…';
+  await downloadReport();
+
+  btn.textContent = '✓ Records Downloaded';
+  status.className = 'wf-status ok';
+  status.textContent = '✓ Workflow complete. Log and report both downloaded.';
+}
+
+async function downloadLog() {
+  if (rawLog.length === 0) { addResult('No commands sent/received yet.', 'info'); return; }
+
+  let jsPDF;
+  try {
+    addResult('Loading PDF library…', 'info');
+    jsPDF = await loadJsPDF();
+  } catch (e) {
+    addResult('PDF library unavailable. Exporting as text.', 'err');
+    downloadLogText();
+    return;
+  }
+
+  try {
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const marginL = 10, marginT = 22, marginB = 10;
+    const lineH = 5;
+    let y = marginT;
+
+    const testerName = getTesterName();
+    const soDetails = getSoDetails();
+    const exportDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) +
+      '  ' + new Date().toLocaleTimeString('en-GB', { hour12: false });
+
+    function drawLogHeader() {
+      doc.setFillColor(255, 255, 255);
+      doc.rect(0, 0, pageW, 16, 'F');
+      doc.setDrawColor(200, 197, 188);
+      doc.line(0, 16, pageW, 16);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(28, 27, 24);
+      doc.text(`${soDetails} — Command Log`, marginL, 8);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(80, 78, 74);
+      doc.text(`Tested by: ${testerName}`, marginL, 13);
+      doc.setTextColor(112, 110, 104);
+      doc.text(exportDate, pageW - marginL, 13, { align: 'right' });
+    }
+
+    doc.setFont('courier', 'normal');
+    doc.setFontSize(8.5);
+    drawLogHeader();
+
+    function ensureSpace() {
+      if (y + lineH > pageH - marginB) {
+        doc.addPage();
+        drawLogHeader();
+        doc.setFont('courier', 'normal');
+        doc.setFontSize(8.5);
+        y = marginT;
+      }
+    }
+
+    rawLog.forEach(entry => {
+      ensureSpace();
+      const dateStr = entry.ts.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      const timeStr = fmtLogTs(entry.ts);
+      const dirArrow = entry.dir === 'TX' ? '>>' : '<<';
+      const color = entry.dir === 'TX' ? [26, 95, 168] : [123, 63, 168];
+      doc.setTextColor(...color);
+      const line = `(${timeStr}) (${portLabel}) (${dirArrow}) ${entry.text}`;
+      doc.text(line, marginL, y);
+      y += lineH;
+    });
+
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(150, 150, 150);
+      doc.text(`Page ${i} of ${totalPages}`, pageW - marginL, pageH - 5, { align: 'right' });
+      doc.text(`${soDetails} — Command Log`, marginL, pageH - 5);
+    }
+
+    const logFileName = `${safeFilePart(soDetails)}-${safeFilePart(testerName)}-${fileTimestamp()}-logs.pdf`;
+    doc.save(logFileName);
+    addResult(`Command log exported as PDF (${rawLog.length} entries).`, 'ok');
+  } catch (e) {
+    addResult('PDF export failed: ' + e.message + '. Exporting as text.', 'err');
+    downloadLogText();
+  }
+}
+
+function downloadLogText() {
+  const text = rawLog.map(entry => {
+    const timeStr = fmtLogTs(entry.ts);
+    const dirArrow = entry.dir === 'TX' ? '>>' : '<<';
+    return `(${timeStr}) (${portLabel}) (${dirArrow}) ${entry.text}`;
+  }).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
+  a.download = `${safeFilePart(getSoDetails())}-${safeFilePart(getTesterName())}-${fileTimestamp()}-logs.txt`;
+  a.click();
+}
+
+// ── Download Report (results panel with CSS, as image-based PDF) ──
+async function downloadReport() {
+  const wrap = document.getElementById('resultsWrap');
+  if (!wrap.innerHTML.trim()) { addResult('No results to export.', 'info'); return; }
+
+  let html2canvas, jsPDF;
+  try {
+    addResult('Loading report export libraries…', 'info');
+    [html2canvas, jsPDF] = await Promise.all([loadHtml2Canvas(), loadJsPDF()]);
+  } catch (e) {
+    addResult('Report export libraries unavailable.', 'err');
+    return;
+  }
+
+  const prevStyle = {
+    overflow: wrap.style.overflow,
+    maxHeight: wrap.style.maxHeight,
+    height: wrap.style.height,
+  };
+
+  try {
+    const bg = getComputedStyle(document.body).getPropertyValue('--bg') || '#EDEAE3';
+
+    // resultsWrap scrolls internally, so html2canvas only sees the visible
+    // viewport by default. Temporarily expand it to its full scroll height.
+    wrap.style.overflow = 'visible';
+    wrap.style.maxHeight = 'none';
+    wrap.style.height = 'auto';
+    void wrap.offsetHeight; // force reflow so scrollHeight is accurate
+
+    const fullHeight = wrap.scrollHeight;
+
+    const canvas = await html2canvas(wrap, {
+      backgroundColor: bg.trim() || '#EDEAE3',
+      scale: 2,
+      useCORS: true,
+      height: fullHeight,
+      windowHeight: fullHeight,
+    });
+
+    const imgData = canvas.toDataURL('image/png');
+    const pxToMm = px => px * 0.264583;
+    const imgWmm = pxToMm(canvas.width / 2);
+    const imgHmm = pxToMm(canvas.height / 2);
+
+    const pageWmm = 210; // A4 portrait width
+    const marginMm = 8;
+    const headerHmm = 12;
+    const usableWmm = pageWmm - marginMm * 2;
+    const scaleFactor = usableWmm / imgWmm;
+    const scaledHmm = imgHmm * scaleFactor;
+    const pageHmm = 297;
+    const usableHmm = pageHmm - marginMm * 2 - headerHmm;
+
+    const testerName = getTesterName();
+    const soDetails = getSoDetails();
+    const exportDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) +
+      '  ' + new Date().toLocaleTimeString('en-GB', { hour12: false });
+
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+    function drawReportHeader() {
+      doc.setFillColor(255, 255, 255);
+      doc.rect(0, 0, pageWmm, headerHmm, 'F');
+      doc.setDrawColor(200, 197, 188);
+      doc.setLineWidth(0.2);
+      doc.line(marginMm, headerHmm - 2, pageWmm - marginMm, headerHmm - 2);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(28, 27, 24);
+      doc.text(`${soDetails} — Report`, marginMm, 7);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(80, 78, 74);
+      doc.text(`Tested by: ${testerName}`, marginMm, 11);
+      doc.setTextColor(112, 110, 104);
+      doc.text(exportDate, pageWmm - marginMm, 11, { align: 'right' });
+    }
+
+    if (scaledHmm <= usableHmm) {
+      drawReportHeader();
+      doc.addImage(imgData, 'PNG', marginMm, marginMm + headerHmm, usableWmm, scaledHmm);
+    } else {
+      // Slice image across multiple pages
+      const pxPerPageMm = usableHmm / scaleFactor; // in original px-mm space
+      const totalHmmOriginal = imgHmm;
+      let renderedMm = 0;
+      let first = true;
+      while (renderedMm < totalHmmOriginal) {
+        if (!first) doc.addPage();
+        first = false;
+        drawReportHeader();
+        const sliceHmm = Math.min(pxPerPageMm, totalHmmOriginal - renderedMm);
+        const sourceYpx = (renderedMm / totalHmmOriginal) * canvas.height;
+        const sourceHpx = (sliceHmm / totalHmmOriginal) * canvas.height;
+
+        const sliceCanvas = document.createElement('canvas');
+        sliceCanvas.width = canvas.width;
+        sliceCanvas.height = sourceHpx;
+        const ctx = sliceCanvas.getContext('2d');
+        ctx.drawImage(canvas, 0, sourceYpx, canvas.width, sourceHpx, 0, 0, canvas.width, sourceHpx);
+        const sliceData = sliceCanvas.toDataURL('image/png');
+        doc.addImage(sliceData, 'PNG', marginMm, marginMm + headerHmm, usableWmm, sliceHmm * scaleFactor);
+        renderedMm += sliceHmm;
+      }
+    }
+
+    const reportFileName = `${safeFilePart(soDetails)}-${safeFilePart(testerName)}-${fileTimestamp()}-report.pdf`;
+    doc.save(reportFileName);
+    addResult('Report exported as PDF.', 'ok');
+  } catch (e) {
+    addResult('Report export failed: ' + e.message, 'err');
+  } finally {
+    // Restore original scrollable styling regardless of success/failure
+    wrap.style.overflow = prevStyle.overflow;
+    wrap.style.maxHeight = prevStyle.maxHeight;
+    wrap.style.height = prevStyle.height;
+  }
+}
+
+// ── DIP Switch Visual Generator ──
+const ALFIE_DIP = [
+  { label: 'Alfie 1', switches: [1, 0, 0, 0, 0, 0] },
+  { label: 'Alfie 2', switches: [0, 1, 0, 0, 0, 0] },
+  { label: 'Alfie 3', switches: [1, 1, 0, 0, 0, 0] },
+  { label: 'Alfie 4', switches: [0, 0, 1, 0, 0, 0] },
+  { label: 'Alfie 5', switches: [1, 0, 1, 0, 0, 0] },
+  { label: 'Alfie 6', switches: [0, 1, 1, 0, 0, 1] },
+];
+
+function renderDipSwitches() {
+  const grid = document.getElementById('dipGrid');
+  grid.innerHTML = ALFIE_DIP.map(a => {
+    const switches = a.switches.map((on, i) =>
+      `<div class="dip-sw ${on ? 'on' : 'off'}"><div class="dip-knob"></div><span class="dip-sw-num">${i + 1}</span></div>`
+    ).join('');
+    return `<div class="dip-card"><div class="dip-card-label">${a.label}</div><div class="dip-body">${switches}</div></div>`;
+  }).join('');
+}
+
+// ── Init ──
+window.addEventListener('DOMContentLoaded', () => {
+  const badge = document.getElementById('apiBadge');
+  if (!HAS_API) {
+    badge.textContent = 'API unavailable';
+    badge.style.borderColor = '#D4980A'; badge.style.color = 'var(--amber)';
+    document.getElementById('apiWarn').style.display = 'block';
+  } else {
+    badge.textContent = 'API ready';
+    badge.style.borderColor = 'var(--green)'; badge.style.color = 'var(--green)';
+  }
+  applyStoredTheme();
+  renderDipSwitches();
+  updateStepTitles();
+  loadStoredTesterName();
+  addResult('Ready — connect a COM port to begin.', 'info');
+});
+</script>
+</body>
+</html>
